@@ -827,6 +827,7 @@ struct: (inout t: meta::type_declaration) =
     t.disable_member_function_generation();
 }
 
+cuda: namespace = {
 heterogeneous: (inout t: meta::type_declaration) =
 {
     for t.get_members() do (inout m)
@@ -836,6 +837,7 @@ heterogeneous: (inout t: meta::type_declaration) =
             mf.make_heterogeneous();
         }
     }
+}
 }
 
 //-----------------------------------------------------------------------
@@ -1329,8 +1331,8 @@ apply_metafunctions: (
         else if name == "print" {
             print( rtype );
         }
-        else if name == "heterogeneous" {
-            heterogeneous( rtype );
+        else if name == "cuda::heterogeneous" {
+            cuda::heterogeneous( rtype );
         }
         else {
             error( "unrecognized metafunction name: " + name );
