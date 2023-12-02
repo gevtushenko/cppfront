@@ -1,0 +1,24 @@
+#include <cstdio>
+
+template <class K>
+void launch(K kernel) {
+    kernel<<<1, 1>>>();
+}
+
+test: @heterogeneous type = {
+    val: int = 42;
+    
+    hello: (in this) = {
+        std::printf("hello: %d\n", this.val);
+    }
+}
+
+__global__ void kernel() {
+    test t;
+    t.hello();
+}
+
+main: () -> int = {
+    launch(kernel);
+    cudaDeviceSynchronize();
+}

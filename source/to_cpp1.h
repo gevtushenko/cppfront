@@ -1151,10 +1151,7 @@ public:
         //  "Constraints enable creativity in the right directions"
         //  sort of applies here
         //
-        if (
-            !sourcefile.ends_with(".cpp2")
-            && !sourcefile.ends_with(".h2")
-            )
+        if (!sourcefile.ends_with("2"))
         {
             errors.emplace_back(
                 source_position(-1, -1),
@@ -5896,6 +5893,11 @@ public:
                     )
                 {
                     printer.print_cpp2( "[[nodiscard]] ", n.position() );
+                }
+
+                if (func->is_heterogeneous())
+                {
+                    printer.print_cpp2( "__host__ __device__ ", n.position() );
                 }
 
                 //  Now we have all the pieces we need for the Cpp1 function declaration

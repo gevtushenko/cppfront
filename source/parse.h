@@ -2172,6 +2172,9 @@ struct function_type_node
     std::unique_ptr<parameter_declaration_list_node> parameters;
     bool throws = false;
 
+    enum class space { host, device, heterogeneous };
+    space spc = space::host;
+
     struct single_type_id {
         std::unique_ptr<type_id_node> type;
         passing_style pass = passing_style::move;
@@ -2200,6 +2203,9 @@ struct function_type_node
         -> bool;
 
     auto make_function_virtual()
+        -> bool;
+
+    auto make_function_heterogeneous()
         -> bool;
 
     auto is_defaultable() const
@@ -2245,6 +2251,9 @@ struct function_type_node
         -> bool;
 
     auto is_destructor() const
+        -> bool;
+
+    auto is_heterogeneous() const
         -> bool;
 
     auto has_declared_return_type() const
@@ -3107,6 +3116,16 @@ public:
         return false;
     }
 
+    auto make_function_heterogeneous()
+        -> bool
+    {
+        if (auto func = std::get_if<a_function>(&type)) {
+            return (*func)->make_function_heterogeneous();
+        }
+        //  else
+        return false;
+    }
+
     auto is_defaultable_function() const
         -> bool
     {
@@ -3549,6 +3568,12 @@ auto function_type_node::make_function_virtual()
     return false;
 }
 
+auto function_type_node::make_function_heterogeneous()
+    -> bool
+{
+    spc = space::heterogeneous;
+    return true;
+}
 
 auto function_type_node::is_defaultable() const
     -> bool
@@ -3799,6 +3824,11 @@ auto function_type_node::is_destructor() const
     return false;
 }
 
+auto function_type_node::is_heterogeneous() const
+    -> bool
+{
+    return spc == space::heterogeneous;
+}
 
 auto primary_expression_node::template_arguments() const
     -> std::vector<template_argument> const&
@@ -4742,7 +4772,11 @@ auto pretty_print_visualize(function_type_node const& n, int indent)
 {
     assert (n.parameters);
 
-    auto ret = pretty_print_visualize(*n.parameters, indent);
+    std::string ret{};
+    if (n.spc == function_type_node::space::heterogeneous) {
+        ret = "__host__ __device__ ";
+    }
+    ret += pretty_print_visualize(*n.parameters, indent);
 
     if (n.throws) {
         ret += " throws";

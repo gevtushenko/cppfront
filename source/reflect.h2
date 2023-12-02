@@ -349,6 +349,8 @@ function_declaration: @copyable type =
     default_to_virtual           : (inout this) = _ = n*.make_function_virtual();
 
     make_virtual                 : (inout this) -> bool = n*.make_function_virtual();
+
+    make_heterogeneous           : (inout this) -> bool = n*.make_function_heterogeneous();
 }
 
 
@@ -825,6 +827,16 @@ struct: (inout t: meta::type_declaration) =
     t.disable_member_function_generation();
 }
 
+heterogeneous: (inout t: meta::type_declaration) =
+{
+    for t.get_members() do (inout m)
+    {
+        if m.is_function() {
+            mf := m.as_function();
+            mf.make_heterogeneous();
+        }
+    }
+}
 
 //-----------------------------------------------------------------------
 //
@@ -1316,6 +1328,9 @@ apply_metafunctions: (
         }
         else if name == "print" {
             print( rtype );
+        }
+        else if name == "heterogeneous" {
+            heterogeneous( rtype );
         }
         else {
             error( "unrecognized metafunction name: " + name );
